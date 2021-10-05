@@ -13,7 +13,7 @@ print("Quantidade total de registros por valor TRUE e FALSE: \n", dataset['Clean
 #Registros que possuem valor TRUE são removidos, mantendo somente os registros que não obedecem a condição
 dataset = dataset.drop(dataset[dataset.Clean == False].index)
 print("Após 1º filtro: ", len(dataset), " registros.", "\n", "-" * 50)
-# #Removendo registros com valores diferentes de "Yes" da coluna ATB
+#Removendo registros com valores diferentes de "Yes" da coluna ATB
 print("Valores da coluna ATB: \n", dataset.ATB.unique(), "\n")
 dataset = dataset.drop(dataset[dataset.ATB != "Yes"].index)
 print("Após 2º filtro: ", len(dataset), " registros.", "\n", "-" * 50)
