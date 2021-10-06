@@ -11,14 +11,13 @@ print("Dataset inteiro: ", len(dataset), " registros.", "\n", "-" * 50)
 dataset['Clean'] = np.logical_and(dataset['ATB'] == "Yes", dataset['Program Pending'] == 0)
 print("Quantidade total de registros por valor TRUE e FALSE: \n", dataset['Clean'].value_counts().to_string(), "\n", "-" * 50)
 #Registros que possuem valor TRUE são removidos, mantendo somente os registros que não obedecem a condição
-dataset = dataset.drop(dataset[dataset.Clean == False].index)
-print("Após 1º filtro: ", len(dataset), " registros.", "\n", "-" * 50)
-#Removendo registros com valores diferentes de "Yes" da coluna ATB
-print("Valores da coluna ATB: \n", dataset.ATB.unique(), "\n")
-dataset = dataset.drop(dataset[dataset.ATB != "Yes"].index)
-print("Após 2º filtro: ", len(dataset), " registros.", "\n", "-" * 50)
+dsATENDE = dataset.drop(dataset[dataset.Clean == False].index)
+dsNAO_ATENDE = dataset.drop(dataset[dataset.Clean == True].index)
 
-del dataset['Clean']
+del dataset['Clean'] 
+del dsATENDE['Clean'] 
+del dsNAO_ATENDE['Clean']
 
 #EXPORTAÇÃO 1
-dataset.to_excel('New Produccion.xlsx', sheet_name="PN", header=True, index=False)
+dsATENDE.to_excel('Fornecedores_A', sheet_name="Fornecedores", header=True, index=False)
+dsNAO_ATENDE.to_excel('Fornecedores_NA.xlsx', sheet_name="Fornecedores", header=True, index=False)
