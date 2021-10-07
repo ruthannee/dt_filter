@@ -32,6 +32,8 @@ word2.split("/")[2] #'AA'
 word2.split("/")[3] #''
 word2.split("/")[0] + word2.split("/")[1] + word2.split("/")[2] + word2.split("/")[3] #'1C352510130AA'
 
+word3 = dsATENDE['Part number'].values[259] #'2S65/A243W06/AB/35B'
+
 pattern = '(?<=/).+?/'
 result = re.search(pattern, word)
 word[result.start():result.end() - 1] #'305031'
