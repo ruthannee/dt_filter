@@ -31,6 +31,8 @@ def ident_func(word):
     word = word.strip('/')
     return re.sub('/', '', word) if word.count('/') == 1 else re.sub('/', '', word.rsplit('/', 1)[0])
 
+dsATENDE['Part number'] = dsATENDE.apply(lambda r:  ident_func(r['Part number']), axis=1)
+
 print(ident_func(word)) #305031S2
 print(ident_func(word2)) #1C352510130
 print(ident_func(word3)) #2S65A243W06AB
