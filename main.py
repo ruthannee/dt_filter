@@ -3,7 +3,7 @@ import numpy as np
 import re
 
 #Importando o dataset
-dataset = pd.read_excel('Produccion.xlsx', sheet_name="PN")
+dataset = pd.read_excel('20210922 GSBDs_Produtivo_Fechamento (Produccion).xlsx', sheet_name="Part Numbers")
 print(dataset.head(),"\n", "-" * 50)
 print("Dataset inteiro: ", len(dataset), " registros.", "\n", "-" * 50)
 
@@ -22,18 +22,21 @@ del dsNAO_ATENDE['Clean']
 dsATENDE.to_excel('Fornecedores_A.xlsx', sheet_name="Fornecedores", header=True, index=False)
 dsNAO_ATENDE.to_excel('Fornecedores_NA.xlsx', sheet_name="Fornecedores", header=True, index=False)
 
-word = dsATENDE['Part number'].values[0] #'/305031/S2/'
-word2 = dsATENDE['Part number'].values[75] #'1C35/2510130/AA/'
-word3 = dsATENDE['Part number'].values[259] #'2S65/A243W06/AB/35B'
-word4 = "GU5A/96613A39/LC/"
-
 def ident_func(word):
     word = word.strip('/')
     return re.sub('/', '', word) if word.count('/') == 1 else re.sub('/', '', word.rsplit('/', 1)[0])
 
 dsATENDE['Part number'] = dsATENDE.apply(lambda r:  ident_func(r['Part number']), axis=1)
+dsNAO_ATENDE['Part number'] = dsNAO_ATENDE.apply(lambda r:  ident_func(r['Part number']), axis=1)
 
-print(ident_func(word)) #305031S2
-print(ident_func(word2)) #1C352510130
-print(ident_func(word3)) #2S65A243W06AB
-print(ident_func(word4)) #GU5A96613A39
+#Planilha do fornecedor
+fornecedor = pd.read_excel('Fornecedores/Teste.xlsx')
+fornecedor.head()
+print(fornecedor.columns)
+
+dsATENDE['CONSTA'] = dsATENDE.apply(lambda df1: len(list(filter(lambda df2: df1['Part number'] in df2, fornecedor['Part number']))) > 0, axis=1)
+dsNAO_ATENDE['CONSTA'] = dsNAO_ATENDE.apply(lambda df1: len(list(filter(lambda df2: df1['Part number'] in df2, fornecedor['Part number']))) > 0, axis=1)
+
+#EXPORTAÇÃO FINAL
+dsATENDE.to_excel('Novo Fornecedores AT.xlsx', sheet_name="Fornecedores", header=True, index=False)
+dsNAO_ATENDE.to_excel('Novo Fornecedores NA.xlsx', sheet_name="Fornecedores", header=True, index=False)
