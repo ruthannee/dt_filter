@@ -31,11 +31,22 @@ dsNAO_ATENDE['Part number'] = dsNAO_ATENDE.apply(lambda r:  ident_func(r['Part n
 
 #Planilha do fornecedor
 fornecedor = pd.read_excel('Fornecedores/Teste.xlsx')
+fornecedor['Part number'] = fornecedor['Part number'].str.upper()
 fornecedor.head()
-print(fornecedor.columns)
 
 dsATENDE['CONSTA'] = dsATENDE.apply(lambda df1: len(list(filter(lambda df2: df1['Part number'] in df2, fornecedor['Part number']))) > 0, axis=1)
 dsNAO_ATENDE['CONSTA'] = dsNAO_ATENDE.apply(lambda df1: len(list(filter(lambda df2: df1['Part number'] in df2, fornecedor['Part number']))) > 0, axis=1)
+
+dsATENDE = dsATENDE.drop(dsATENDE[dsATENDE['CONSTA'] == False].index)
+dsNAO_ATENDE = dsNAO_ATENDE.drop(dsNAO_ATENDE[dsNAO_ATENDE['CONSTA'] == True].index)
+
+#retorna registros de CONSTA == True
+fornecedor['FINAL'] = dsATENDE[~dsATENDE['Part number'].isin(fornecedor['Part number'])]['Part number'].values
+print(fornecedor.columns)
+
+dsATENDE = pd.merge(dsATENDE, fornecedor, how='inner', left_on='Part number', right_on='FINAL')
+dsATENDE.rename(columns={'Part number_x' : 'Part number', 'Part number_y': 'PD Original'}, inplace=True)
+del dsATENDE['FINAL']
 
 #EXPORTAÇÃO FINAL
 dsATENDE.to_excel('Novo Fornecedores AT.xlsx', sheet_name="Fornecedores", header=True, index=False)
