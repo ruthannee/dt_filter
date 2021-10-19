@@ -4,8 +4,7 @@ import re
 from xlsxwriter.utility import xl_rowcol_to_cell
 
 #Importando o dataset
-dataset = pd.read_excel('20210922 GSBDs_Produtivo_Fechamento (Produccion).xlsx', sheet_name="Part Numbers")
-print(dataset.head(),"\n", "-" * 50)
+dataset = pd.read_excel('Produccion.xlsx', sheet_name="Part Numbers")
 print("Dataset inteiro: ", len(dataset), " registros.", "\n", "-" * 50)
 
 #Uma coluna "Clean" é criada, atribuindo TRUE para a condição
@@ -31,9 +30,13 @@ dsATENDE['Part number'] = dsATENDE.apply(lambda r:  ident_func(r['Part number'])
 dsNAO_ATENDE['Part number'] = dsNAO_ATENDE.apply(lambda r:  ident_func(r['Part number']), axis=1)
 
 #Planilha do fornecedor
-fornecedor = pd.read_excel('Fornecedores/Teste.xlsx')
+fornecedor = pd.read_excel('Fornecedores/Fornecedor.xlsm', sheet_name="FERRAMENTAS")
+fornecedor.rename(columns={'Unnamed: 1' : 'Part number', 'Unnamed: 14' : 'Final status'}, inplace=True)
+fornecedor = pd.DataFrame(fornecedor[['Part number', 'Final status']])
+fornecedor = fornecedor.drop(fornecedor.index[[0]])
 fornecedor['Part number'] = fornecedor['Part number'].str.upper()
-fornecedor.head()
+fornecedor['Final status'] = fornecedor['Final status'].str.upper()
+print("PRIMEIROS REGISTROS DO FORNECEDOR: \n", fornecedor.head())
 
 dsATENDE['CONSTA'] = dsATENDE.apply(lambda df1: len(list(filter(lambda df2: df1['Part number'] in df2, fornecedor['Part number']))) > 0, axis=1)
 dsNAO_ATENDE['CONSTA'] = dsNAO_ATENDE.apply(lambda df1: len(list(filter(lambda df2: df1['Part number'] in df2, fornecedor['Part number']))) > 0, axis=1)
@@ -41,13 +44,9 @@ dsNAO_ATENDE['CONSTA'] = dsNAO_ATENDE.apply(lambda df1: len(list(filter(lambda d
 dsATENDE = dsATENDE.drop(dsATENDE[dsATENDE['CONSTA'] == False].index)
 dsNAO_ATENDE = dsNAO_ATENDE.drop(dsNAO_ATENDE[dsNAO_ATENDE['CONSTA'] == True].index)
 
-#retorna registros de CONSTA == True
-fornecedor['FINAL'] = dsATENDE[~dsATENDE['Part number'].isin(fornecedor['Part number'])]['Part number'].values
-print(fornecedor.columns)
-
-dsATENDE = pd.merge(dsATENDE, fornecedor, how='inner', left_on='Part number', right_on='FINAL')
-dsATENDE.rename(columns={'Part number_x' : 'Part number', 'Part number_y': 'PN Fornecedor'}, inplace=True)
-del dsATENDE['FINAL']
+for pn in dsATENDE.index:
+    dsATENDE.loc[pn, 'PN Fornecedor'] = ', '.join(list(fornecedor[fornecedor['Part number'].str.contains(dsATENDE['Part number'][pn])]['Part number']))
+    dsATENDE.loc[pn, 'Final status'] = ', '.join(list(fornecedor[fornecedor['Part number'].str.contains(dsATENDE['Part number'][pn])]['Final status']))
 
 #EXPORTAÇÃO FINAL
 writer = pd.ExcelWriter('Novo Fornecedores AT.xlsx', engine='xlsxwriter')
@@ -58,7 +57,8 @@ workbook = writer.book
 worksheet = writer.sheets['Fornecedores']
 worksheet.set_zoom(100)
 worksheet.set_column('A:D', 15)
-worksheet.set_column('H:N', 15)
+worksheet.set_column('H:L', 15)
+worksheet.set_column('M:N', 20)
 number_rows = len(dsATENDE.index)
 color_range = "N2:N{}".format(number_rows+1)
 worksheet.set_column('E:G', None, None, {'hidden': True})
@@ -70,11 +70,11 @@ active = workbook.add_format({'bg_color': '#C6EFCE',
                                'font_color': '#006100'})
 worksheet.conditional_format(color_range, {'type':     'cell',
                                     'criteria': 'equal to',
-                                    'value':    '"OBSOLETO"',
+                                    'value':    '"OBSOLETE"',
                                     'format':   obsolete})
 worksheet.conditional_format(color_range, {'type':     'cell',
                                     'criteria': 'equal to',
-                                    'value':    '"ATIVO"',
+                                    'value':    '"ACTIVE"',
                                     'format':   active})
 
 writer.save()
