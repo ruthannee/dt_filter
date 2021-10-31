@@ -1,1 +1,7 @@
 # dt_filter
+
+- Após importação da planilha macro, a coluna *Clean* é criada para que o valor TRUE seja atribuido aos registros que obedecem a condição [dos atributos] **ATB = 'Yes'** e **Program Pending = 0**.
+- Com os valores TRUE e FALSE atribuídos, a planilha macro é dividida em duas: uma planilha que atende a condição (Fornecedores_A) e outra que não atende (Fornecedores_NA), sendo exportadas.
+- A função **ident_func()** elimina as barras ('**/**') das extremidades dos registros. As barras que ainda constam no meio da cadeia de caracteres, independente da posição, são contabilizadas. Caso o registro contenha somente uma barra, a função a elimina, aproveitando toda a cadeia. Se o registro contiver mais de uma barra, a função remove a cadeia de caracteres contida após a última barra, retornando o registro sem barras.
+- A planilha de um fornecedor é importada, na qual somente são aproveitados os atributos *Part Number* e *Final status*. É realizada uma comparação entre os part numbers do fornecedor e da planilha Fornecedores_A, onde as colunas *PN Fornecedor* e *Final status* são criadas somente se um part number de Fornecedores_A esteja contido na planilha do fornecedor. As novas colunas apresentam o valor completo do PN e o status final, exportados da planilha do fornecedor.
+- Por fim, uma nova planilha é exportada com registros que condigam com as condições, exibindo os PNs que estão ativos e obsoletos.
